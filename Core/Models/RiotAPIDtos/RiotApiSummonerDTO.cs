@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace Core.Models.RiotAPI
 {
-    public class SummonerDTO
+    public class RiotApiSummonerDTO
     {
         [JsonProperty("accountId")]
         public string AccountId { get; set; }

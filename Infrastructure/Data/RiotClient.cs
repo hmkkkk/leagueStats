@@ -21,7 +21,7 @@ namespace Infrastructure.Data
             _riotApiKey = _config["RiotApiKey"];
         }
 
-        public async Task<SummonerDTO> GetSummonerByName(string region, string summonerName)
+        public async Task<RiotApiSummonerDTO> GetSummonerByName(string region, string summonerName)
         {
             var client = BuildRestClient(region, false);
 
@@ -34,7 +34,7 @@ namespace Infrastructure.Data
 
             try
             {
-                var obj = JsonConvert.DeserializeObject<SummonerDTO>(response.Content, _serializerSettings);
+                var obj = JsonConvert.DeserializeObject<RiotApiSummonerDTO>(response.Content, _serializerSettings);
 
                 return obj;
             }
@@ -44,12 +44,7 @@ namespace Infrastructure.Data
             }
         }
 
-        public async Task<> GetSummonerMatches(string region, string puuid, int startIndex = 0, int pageSize = 15) 
-        {
-
-        }
-
-        public async Task<List<string>> GetListOfMatchIds(string region, string puuid, int startIndex, int pageSize)
+        public async Task<List<string>> GetListOfSummonerMatchIds(string region, string puuid, int startIndex = 0, int pageSize = 15)
         {
             var client = BuildRestClient(region, true);
 
@@ -63,6 +58,32 @@ namespace Infrastructure.Data
             if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get match history IDs.", null, response.StatusCode);
 
             return JsonConvert.DeserializeObject<List<string>>(response.Content, _serializerSettings);
+        }
+
+        public async Task<List<RiotApiMatchDTO>> GetListOfSummonerMatchesByGameIds(string region, List<string> matchIds) 
+        {
+            List<RiotApiMatchDTO> matchesToReturn = new List<RiotApiMatchDTO>();
+            
+            foreach (string match in matchIds)
+            {
+                 matchesToReturn.Add(await GetMatchByGameId(region, match)); 
+            }
+
+            return matchesToReturn;
+        }
+
+        public async Task<RiotApiMatchDTO> GetMatchByGameId(string region, string matchId) 
+        {
+            var client = BuildRestClient(region, true);
+
+            var request = new RestRequest($"lol/match/v5/matches/{matchId}");
+            request.AddHeader("X-Riot-Token", _riotApiKey);
+
+            var response = await client.ExecuteGetAsync(request);
+
+            if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get match historyby itd IDs. Match ID: {matchId}", null, response.StatusCode);
+
+            return JsonConvert.DeserializeObject<RiotApiMatchDTO>(response.Content, _serializerSettings);
         }
 
         private RestClient BuildRestClient(string region, bool useRegionalRouting) {

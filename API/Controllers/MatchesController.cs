@@ -5,23 +5,22 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-
-    public class SummonersController : BaseApiController
+    public class MatchesController : BaseApiController
     {
         private readonly IRiotClient _client;
-        public SummonersController(IRiotClient client)
+        public MatchesController(IRiotClient client)
         {
             _client = client;
         }
 
         [HttpGet("{region}/{name}")]
-        public async Task<ActionResult<RiotApiSummonerDTO>> GetSummonerByName(string region, string name)
+        public async Task<ActionResult<List<RiotApiMatchDTO>>> GetSummonersMatchHistory(string region, string name, int startIndex = 0, int pageSize = 3)
         {
             try 
             {
-                RiotApiSummonerDTO summonerDTO = await _client.GetSummonerByName(region, name);
+                List<string> matchIds = await _client.GetListOfSummonerMatchIds(region, name, startIndex, pageSize);
 
-                return summonerDTO;
+                return await _client.GetListOfSummonerMatchesByGameIds(region, matchIds);
             }
             catch (HttpRequestException ex) 
             {

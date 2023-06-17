@@ -4,7 +4,9 @@ namespace Core.Interfaces
 {
     public interface IRiotClient
     {
-        Task<SummonerDTO> GetSummonerByName(string region, string summonerName);
-        Task<List<string>> GetListOfMatchIds(string region, string puuid, int startIndex, int pageSize);
+        Task<RiotApiSummonerDTO> GetSummonerByName(string region, string summonerName);
+        Task<List<string>> GetListOfSummonerMatchIds(string region, string puuid, int startIndex = 0, int pageSize = 15);
+        Task<List<RiotApiMatchDTO>> GetListOfSummonerMatchesByGameIds(string region, List<string> matchIds);
+        Task<RiotApiMatchDTO> GetMatchByGameId(string region, string matchId);
     }
 }
