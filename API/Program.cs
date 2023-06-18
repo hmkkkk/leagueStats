@@ -1,12 +1,18 @@
 using API.Middleware;
 using Core.Interfaces;
 using Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<AppDbContext>(opt => 
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    opt.UseMySql(connectionString,  ServerVersion.AutoDetect(connectionString));
+});
 builder.Services.AddScoped<IRiotClient, RiotClient>();
 
 var app = builder.Build();
