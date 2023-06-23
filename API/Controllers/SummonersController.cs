@@ -2,7 +2,7 @@ using API.Errors;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
-using Core.Models.RiotAPI;
+using Core.Models.RiotAPIDtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers

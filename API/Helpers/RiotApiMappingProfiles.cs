@@ -1,6 +1,6 @@
 using AutoMapper;
 using Core.Entities;
-using Core.Models.RiotAPI;
+using Core.Models.RiotAPIDtos;
 
 namespace API.Helpers
 {
@@ -31,6 +31,8 @@ namespace API.Helpers
                     dest => dest.ParticipantPuuids,
                     opt => opt.MapFrom(src => string.Join(',', src.Metadata.Participants))
                 );
+
+            CreateMap<RiotApiLeagueEntryDTO, SummonerRank>();
         }
     }
 }

@@ -1,4 +1,4 @@
-using Core.Models.RiotAPI;
+using Core.Models.RiotAPIDtos;
 
 namespace Core.Interfaces
 {
@@ -8,5 +8,6 @@ namespace Core.Interfaces
         Task<List<string>> GetListOfSummonerMatchIds(string puuid, string region, int startIndex = 0, int pageSize = 15);
         Task<List<RiotApiMatchDTO>> GetListOfSummonerMatchesByGameIds(List<string> matchIds, string region);
         Task<RiotApiMatchDTO> GetMatchByGameId(string matchId, string region);
+        Task<List<RiotApiLeagueEntryDTO>> GetLeagueEntriesForSummoner(string summonerId, string region);
     }
 }
