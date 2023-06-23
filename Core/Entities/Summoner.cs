@@ -12,5 +12,6 @@ namespace Core.Entities
         public string SummonerId { get; set; }
         public DateTime LastUpdated { get; set; }
         public List<SummonerRank> SummonerRanks { get; set; }
+        public string Region { get; set; }
     }
 }
