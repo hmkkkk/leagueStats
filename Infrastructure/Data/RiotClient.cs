@@ -21,7 +21,7 @@ namespace Infrastructure.Data
             _riotApiKey = _config["RiotApiKey"];
         }
 
-        public async Task<RiotApiSummonerDTO> GetSummonerByName(string region, string summonerName)
+        public async Task<RiotApiSummonerDTO> GetSummonerByName(string summonerName, string region)
         {
             var client = BuildRestClient(region, false);
 
@@ -44,7 +44,7 @@ namespace Infrastructure.Data
             }
         }
 
-        public async Task<List<string>> GetListOfSummonerMatchIds(string region, string puuid, int startIndex = 0, int pageSize = 15)
+        public async Task<List<string>> GetListOfSummonerMatchIds(string puuid, string region, int startIndex = 0, int pageSize = 15)
         {
             var client = BuildRestClient(region, true);
 
@@ -60,7 +60,7 @@ namespace Infrastructure.Data
             return JsonConvert.DeserializeObject<List<string>>(response.Content, _serializerSettings);
         }
 
-        public async Task<List<RiotApiMatchDTO>> GetListOfSummonerMatchesByGameIds(string region, List<string> matchIds) 
+        public async Task<List<RiotApiMatchDTO>> GetListOfSummonerMatchesByGameIds(List<string> matchIds, string region) 
         {
             List<RiotApiMatchDTO> matchesToReturn = new List<RiotApiMatchDTO>();
             
@@ -72,7 +72,7 @@ namespace Infrastructure.Data
             return matchesToReturn;
         }
 
-        public async Task<RiotApiMatchDTO> GetMatchByGameId(string region, string matchId) 
+        public async Task<RiotApiMatchDTO> GetMatchByGameId(string matchId, string region) 
         {
             var client = BuildRestClient(region, true);
 

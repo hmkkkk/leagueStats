@@ -20,7 +20,7 @@ namespace API.Controllers
             {
                 List<string> matchIds = await _client.GetListOfSummonerMatchIds(region, name, startIndex, pageSize);
 
-                return await _client.GetListOfSummonerMatchesByGameIds(region, matchIds);
+                return await _client.GetListOfSummonerMatchesByGameIds(matchIds, region);
             }
             catch (HttpRequestException ex) 
             {
