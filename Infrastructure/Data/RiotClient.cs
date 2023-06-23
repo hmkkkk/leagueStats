@@ -1,5 +1,5 @@
 using Core.Interfaces;
-using Core.Models.RiotAPI;
+using Core.Models.RiotAPIDtos;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RestSharp;
@@ -58,6 +58,20 @@ namespace Infrastructure.Data
             if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get match history IDs.", null, response.StatusCode);
 
             return JsonConvert.DeserializeObject<List<string>>(response.Content, _serializerSettings);
+        }
+
+        public async Task<List<RiotApiLeagueEntryDTO>> GetLeagueEntriesForSummoner(string summonerId, string region)
+        {
+            var client = BuildRestClient(region, false);
+
+            var request = new RestRequest($"/lol/league/v4/entries/by-summoner/{summonerId}");
+            request.AddHeader("X-Riot-Token", _riotApiKey);
+
+            var response = await client.ExecuteGetAsync(request);
+
+            if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get league entries.", null, response.StatusCode);
+
+            return JsonConvert.DeserializeObject<List<RiotApiLeagueEntryDTO>>(response.Content, _serializerSettings);
         }
 
         public async Task<List<RiotApiMatchDTO>> GetListOfSummonerMatchesByGameIds(List<string> matchIds, string region) 
