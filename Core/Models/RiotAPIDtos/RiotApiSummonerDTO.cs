@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace Core.Models.RiotAPI
+namespace Core.Models.RiotAPIDtos
 {
     public class RiotApiSummonerDTO
     {

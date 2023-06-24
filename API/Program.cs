@@ -14,6 +14,9 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseMySql(connectionString,  ServerVersion.AutoDetect(connectionString));
 });
 builder.Services.AddScoped<IRiotClient, RiotClient>();
+builder.Services.AddScoped<IMatchRepository, MatchRepository>();
+builder.Services.AddScoped<ISummonerRepository, SummonerRepository>();
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 var app = builder.Build();
 
