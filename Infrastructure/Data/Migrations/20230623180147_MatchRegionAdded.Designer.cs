@@ -3,6 +3,7 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230623180147_MatchRegionAdded")]
+    partial class MatchRegionAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -156,8 +159,7 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("SummonerId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
+                        .HasColumnType("longtext");
 
                     b.Property<long>("SummonerLevel")
                         .HasColumnType("bigint");
@@ -213,7 +215,6 @@ namespace Infrastructure.Data.Migrations
                     b.HasOne("Core.Entities.Summoner", "Summoner")
                         .WithMany("SummonerRanks")
                         .HasForeignKey("SummonerId")
-                        .HasPrincipalKey("SummonerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -16,16 +16,15 @@ namespace Infrastructure.Data
         public async Task<bool> AddMatches(List<Match> matches, CancellationToken cancellationToken)
         {
             _context.AddRange(matches);
-            _context.Entry(matches).State = EntityState.Added;
 
             return await _context.SaveChangesAsync(cancellationToken) > 0;
         }
 
-        public async Task<IReadOnlyList<Match>> GetMatchesForUser(string puuid, string region, CancellationToken cancellationToken, int pageNumber = 0, int pageSize = 15)
+        public async Task<IReadOnlyList<Match>> GetMatchesForUser(string puuid, string region, CancellationToken cancellationToken, int pageNumber = 1, int pageSize = 15)
         {
             return await _context.Matches
                 .Include(x => x.MatchParticipants)
-                .Where(x => x.ParticipantPuuids.Contains(puuid))
+                .Where(x => x.ParticipantPuuids.Contains(puuid) && x.Region == region)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken);
@@ -35,7 +34,7 @@ namespace Infrastructure.Data
         {
             return await _context.Matches
                 .Include(x => x.MatchParticipants)
-                .Where(x => x.ParticipantPuuids.Contains(puuid))
+                .Where(x => x.ParticipantPuuids.Contains(puuid) && x.Region == region)
                 .Select(x => x.MatchId)
                 .ToListAsync(cancellationToken);
         }

@@ -1,31 +1,31 @@
-using API.Errors;
+using API.Dtos;
+using AutoMapper;
 using Core.Interfaces;
-using Core.Models.RiotAPIDtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     public class MatchesController : BaseApiController
     {
-        private readonly IRiotClient _client;
-        public MatchesController(IRiotClient client)
+        private readonly IMatchRepository _matchRepo;
+        private readonly ISummonerRepository _summonerRepo;
+        private readonly IMapper _mapper;
+        public MatchesController(IMatchRepository matchRepo, ISummonerRepository summonerRepo, IMapper mapper)
         {
-            _client = client;
+            _mapper = mapper;
+            _summonerRepo = summonerRepo;
+            _matchRepo = matchRepo;
         }
 
         [HttpGet("{region}/{name}")]
-        public async Task<ActionResult<List<RiotApiMatchDTO>>> GetSummonersMatchHistory(string region, string name, int startIndex = 0, int pageSize = 3)
+        public async Task<ActionResult<List<MatchDTO>>> GetSummonersMatchHistory(string name, string region, 
+                CancellationToken cancellationToken, int pageNumber = 1, int pageSize = 5)
         {
-            try 
-            {
-                List<string> matchIds = await _client.GetListOfSummonerMatchIds(region, name, startIndex, pageSize);
+            string puuid = await _summonerRepo.GetSummonerPuuid(name, region, cancellationToken);
 
-                return await _client.GetListOfSummonerMatchesByGameIds(matchIds, region);
-            }
-            catch (HttpRequestException ex) 
-            {
-                return StatusCode((int)ex.StatusCode, new ApiResponse((int)ex.StatusCode, ex.Message));
-            }
+            var matches = await _matchRepo.GetMatchesForUser(puuid, region, cancellationToken, pageNumber, pageSize);
+
+            return _mapper.Map<List<MatchDTO>>(matches);
         }
     }
 }

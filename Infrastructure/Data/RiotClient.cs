@@ -80,7 +80,7 @@ namespace Infrastructure.Data
             
             foreach (string match in matchIds)
             {
-                 matchesToReturn.Add(await GetMatchByGameId(region, match)); 
+                 matchesToReturn.Add(await GetMatchByGameId(match, region)); 
             }
 
             return matchesToReturn;
