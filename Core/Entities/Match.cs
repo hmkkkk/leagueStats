@@ -9,6 +9,7 @@ namespace Core.Entities
         public DateTime MatchDate { get; set; }
         public int QueueId { get; set; }
         public string ParticipantPuuids { get; set; }
+        public string Region { get; set; }
         public List<MatchParticipant> MatchParticipants { get; set; } = new List<MatchParticipant>();
     }
 }

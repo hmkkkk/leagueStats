@@ -8,6 +8,7 @@ namespace Core.Interfaces
         Task<bool> SummonerExistsInDb(string name, string region, CancellationToken cancellationToken);
         Task<Summoner> AddNewSummoner(Summoner summoner, CancellationToken cancellationToken);
         Task UpdateSummoner(Summoner summoner, CancellationToken cancellationToken);
-        Task<Summoner> GetSummonerByName(string name, string region, bool withRanks, CancellationToken cancellationToken);
+        Task<Summoner> GetSummonerByName(string name, string region, CancellationToken cancellationToken);
+        Task UpdateSummonerRank(List<SummonerRank> ranks, string summonerId, CancellationToken cancellationToken);
     }
 }
