@@ -1,6 +1,8 @@
+using System.Net;
 using Core.Interfaces;
 using Core.Models.RiotAPIDtos;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using RestSharp;
 
@@ -15,8 +17,10 @@ namespace Infrastructure.Data
         };
         private readonly IConfiguration _config;
         private readonly string _riotApiKey;
-        public RiotClient(IConfiguration config)
+        private readonly ILogger<RiotClient> _logger;
+        public RiotClient(IConfiguration config, ILogger<RiotClient> logger)
         {
+            _logger = logger;
             _config = config;
             _riotApiKey = _config["RiotApiKey"];
         }
@@ -25,10 +29,10 @@ namespace Infrastructure.Data
         {
             var client = BuildRestClient(region, false);
 
-            var request = new RestRequest($"lol/summoner/v4/summoners/by-name/{summonerName}");
+            var request = new RestRequest($"lol/summoner/v4/summoners/by-name/{summonerName}", Method.Get);
             request.AddHeader("X-Riot-Token", _riotApiKey);
 
-            var response = await client.ExecuteGetAsync(request);
+            var response = await ExecuteRequest(client, request);
 
             if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get summoner {summonerName}.", null, response.StatusCode);
 
@@ -48,12 +52,12 @@ namespace Infrastructure.Data
         {
             var client = BuildRestClient(region, true);
 
-            var request = new RestRequest($"lol/match/v5/matches/by-puuid/${puuid}/ids");
+            var request = new RestRequest($"lol/match/v5/matches/by-puuid/${puuid}/ids", Method.Get);
             request.AddHeader("X-Riot-Token", _riotApiKey);
             request.AddParameter("start", startIndex);
             request.AddParameter("count", pageSize);
 
-            var response = await client.ExecuteGetAsync(request);
+            var response = await ExecuteRequest(client, request);
 
             if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get match history IDs.", null, response.StatusCode);
 
@@ -64,10 +68,10 @@ namespace Infrastructure.Data
         {
             var client = BuildRestClient(region, false);
 
-            var request = new RestRequest($"/lol/league/v4/entries/by-summoner/{summonerId}");
+            var request = new RestRequest($"/lol/league/v4/entries/by-summoner/{summonerId}", Method.Get);
             request.AddHeader("X-Riot-Token", _riotApiKey);
 
-            var response = await client.ExecuteGetAsync(request);
+            var response = await ExecuteRequest(client, request);
 
             if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get league entries.", null, response.StatusCode);
 
@@ -90,14 +94,31 @@ namespace Infrastructure.Data
         {
             var client = BuildRestClient(region, true);
 
-            var request = new RestRequest($"lol/match/v5/matches/{matchId}");
+            var request = new RestRequest($"lol/match/v5/matches/{matchId}", Method.Get);
             request.AddHeader("X-Riot-Token", _riotApiKey);
 
-            var response = await client.ExecuteGetAsync(request);
+            var response = await ExecuteRequest(client, request);
 
             if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get match historyby itd IDs. Match ID: {matchId}", null, response.StatusCode);
 
             return JsonConvert.DeserializeObject<RiotApiMatchDTO>(response.Content, _serializerSettings);
+        }
+
+        private async Task<RestResponse> ExecuteRequest(RestClient client, RestRequest request)
+        {
+            while (true)
+            {
+                var response = await client.ExecuteAsync(request);
+                
+                if (response.StatusCode == HttpStatusCode.TooManyRequests) // if rate limit has been exceeded then just wait it out
+                {
+                    _logger.LogWarning("too many requests. Sleeping");
+                    Thread.Sleep(10000);
+                    continue;
+                }
+
+                return response;
+            }
         }
 
         private RestClient BuildRestClient(string region, bool useRegionalRouting) {
