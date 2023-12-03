@@ -35,6 +35,16 @@ namespace Infrastructure.Data
             return await query.FirstOrDefaultAsync(cancellationToken);
         }
 
+        public async Task<Summoner> GetSummonerByPuuid(string puuid, string region, CancellationToken cancellationToken)
+        {
+            var query = _context.Summoners
+                .Include(x => x.SummonerRanks)
+                .Where(x => x.Puuid == puuid && x.Region == region)
+                .AsQueryable();
+
+            return await query.FirstOrDefaultAsync(cancellationToken);
+        }
+
         public async Task<string> GetSummonerPuuid(string name, string region, CancellationToken cancellationToken)
         {
             return await _context.Summoners
@@ -43,10 +53,10 @@ namespace Infrastructure.Data
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<bool> SummonerExistsInDb(string name, string region, CancellationToken cancellationToken)
+        public async Task<bool> SummonerExistsInDb(string puuid, CancellationToken cancellationToken)
         {
             return await _context.Summoners
-                .Where(x => x.Name == name && x.Region == region)
+                .Where(x => x.Puuid == puuid)
                 .AnyAsync(cancellationToken);
         }
 
