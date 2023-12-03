@@ -26,13 +26,25 @@ namespace API.Controllers
         [HttpGet("{region}/{name}")]
         public async Task<ActionResult<SummonerDTO>> GetSummonerByName(string name, string region, CancellationToken cancellationToken)
         {
-            if (!await _summonerRepo.SummonerExistsInDb(name, region, cancellationToken))
+            string puuid = await _summonerRepo.GetSummonerPuuid(name, region, cancellationToken);
+
+            if (!await _summonerRepo.SummonerExistsInDb(puuid, cancellationToken))
             {
                 try 
                 {
-                    var summoner = await GetSummonerWithRankFromApi(name, region, cancellationToken);
+                    var apiSummonerDTO = await _client.GetSummonerByName(name, region);
 
-                    summoner = await _summonerRepo.AddNewSummoner(summoner, cancellationToken);
+                    var summoner = await GetSummonerWithRankFromApi(apiSummonerDTO, region, cancellationToken);
+
+                    if (!await _summonerRepo.SummonerExistsInDb(summoner.Puuid, cancellationToken))
+                    {
+                        summoner = await _summonerRepo.AddNewSummoner(summoner, cancellationToken);
+                    } 
+                    else
+                    {
+                        await _summonerRepo.UpdateSummoner(summoner, cancellationToken);
+                        await _summonerRepo.UpdateSummonerRank(summoner.SummonerRanks, summoner.SummonerId, cancellationToken);
+                    } 
 
                     var matchIds = await _matchRepo.GetAllMatchIdsForUser(summoner.Puuid, region, cancellationToken);
  
@@ -49,17 +61,19 @@ namespace API.Controllers
             return _mapper.Map<SummonerDTO>(summonerFromDb);
         }
 
-        [HttpGet("{region}/{name}/update")]
-        public async Task<ActionResult<SummonerDTO>> UpdateSummonerData(string name, string region, CancellationToken cancellationToken)
+        [HttpGet("{region}/{puuid}/update")]
+        public async Task<ActionResult<SummonerDTO>> UpdateSummonerData(string puuid, string region, CancellationToken cancellationToken)
         {
-            if (!await _summonerRepo.SummonerExistsInDb(name, region, cancellationToken))
+            if (!await _summonerRepo.SummonerExistsInDb(puuid, cancellationToken))
             {
-                return RedirectToAction("GetSummonerByName", new { name = name, region = region, cancellationToken = cancellationToken});
+                return StatusCode(404, new ApiResponse(404, "Summoner with given puuid does not exist in database. Please use \'/region/name\' endpoint to add a new user."));
             }
 
             try 
             {
-                var summoner = await GetSummonerWithRankFromApi(name, region, cancellationToken);
+                var apiSummonerDTO = await _client.GetSummonerByPuuid(puuid, region);
+
+                var summoner = await GetSummonerWithRankFromApi(apiSummonerDTO, region, cancellationToken);
 
                 await _summonerRepo.UpdateSummoner(summoner, cancellationToken);
                 await _summonerRepo.UpdateSummonerRank(summoner.SummonerRanks, summoner.SummonerId, cancellationToken);
@@ -73,15 +87,13 @@ namespace API.Controllers
                 return StatusCode((int)ex.StatusCode, new ApiResponse((int)ex.StatusCode, ex.Message));
             }
 
-            var summonerFromDb = await _summonerRepo.GetSummonerByName(name, region, cancellationToken);
+            var summonerFromDb = await _summonerRepo.GetSummonerByPuuid(puuid, region, cancellationToken);
 
             return _mapper.Map<SummonerDTO>(summonerFromDb);
         }
 
-        private async Task<Summoner> GetSummonerWithRankFromApi(string name, string region, CancellationToken cancellationToken) 
+        private async Task<Summoner> GetSummonerWithRankFromApi(RiotApiSummonerDTO apiSummonerDTO, string region, CancellationToken cancellationToken) 
         {
-            var apiSummonerDTO = await _client.GetSummonerByName(name, region);
-            
             var summoner = _mapper.Map<Summoner>(apiSummonerDTO);
 
             var apiSummonerRanks = await _client.GetLeagueEntriesForSummoner(summoner.SummonerId, region);

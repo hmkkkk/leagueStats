@@ -48,6 +48,29 @@ namespace Infrastructure.Data
             }
         }
 
+        public async Task<RiotApiSummonerDTO> GetSummonerByPuuid(string puuid, string region)
+        {
+            var client = BuildRestClient(region, false);
+
+            var request = new RestRequest($"lol/summoner/v4/summoners/by-puuid/{puuid}", Method.Get);
+            request.AddHeader("X-Riot-Token", _riotApiKey);
+
+            var response = await ExecuteRequest(client, request);
+
+            if (!response.IsSuccessful) throw new HttpRequestException($"Failed to get summoner {puuid}.", null, response.StatusCode);
+
+            try
+            {
+                var obj = JsonConvert.DeserializeObject<RiotApiSummonerDTO>(response.Content, _serializerSettings);
+
+                return obj;
+            }
+            catch
+            {
+                throw new JsonSerializationException($"[GetSummonerByPuuid] Could not deserialize response: {response.Content} to type SummonerDTO");
+            }
+        }
+
         public async Task<List<string>> GetListOfSummonerMatchIds(string puuid, string region, int startIndex = 0, int pageSize = 15)
         {
             var client = BuildRestClient(region, true);
