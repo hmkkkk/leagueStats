@@ -1,4 +1,4 @@
-export interface GetSummonerForm {
+export interface SummonerForm {
     region: string,
     name: string
 }
