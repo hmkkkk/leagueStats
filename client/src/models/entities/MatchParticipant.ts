@@ -1,0 +1,32 @@
+export interface MatchParticipant {
+    matchId: string;
+    puuid: string;
+    assists: number;
+    deaths: number;
+    kills: number;
+    creepScore: number;
+    visionScore: number;
+    wardsBought: number;
+    championLevel: number;
+    championId: number;
+    championName: string;
+    championTransform: number;
+    doubleKills: number;
+    tripleKills: number;
+    quadraKills: number;
+    pentaKills: number;
+    goldEarned: number;
+    teamPosition: string;
+    summonerName: string;
+    items: string;
+    profileIcon: number;
+    summoner1Id: number;
+    summoner2Id: number;
+    totalDamageDealtToChampions: number;
+    win: boolean;
+    primaryRuneId: number;
+    primaryRunePerks: string;
+    secondaryRuneId: number;
+    secondaryRunePerks: string;
+    statPerks: string;
+}
