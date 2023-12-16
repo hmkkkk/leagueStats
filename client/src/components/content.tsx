@@ -10,18 +10,15 @@ const Content = () => {
     const { getSummoner, getMatches, updateSummoner, summoner, matches, page } = useContext(GlobalContext);
 
     const getSummonerClick = async () => {
-    const summoner = await getSummoner?.({name, region})
-    console.log(summoner)
+        await getSummoner?.({name, region})
     }
 
     const updateClick = async () => {
-    const summoner = await updateSummoner?.({puuid, region})
-    console.log(summoner)
+        await updateSummoner?.({puuid, region})
     }
 
     const getMatchesClick = async () => {
-    const summoner = await getMatches?.({name, region, pageNumber: page})
-    console.log(summoner)
+        await getMatches?.({name, region, pageNumber: page})
     }
 
     return(
