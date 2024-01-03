@@ -1,8 +1,15 @@
+import HomePageForm from "./homePageForm";
+
 const HomePage = () => {
     return (
-        <>
-            <h1>Home page!</h1>
-        </>
+        <div className="container mt-4" style={{width: "40%"}}>
+            <div className="text-center">
+                <h1>League Stats</h1>
+            </div>
+            <div className="">
+                <HomePageForm />
+            </div>
+        </div>
     )
 }
 
